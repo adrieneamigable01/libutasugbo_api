@@ -33,25 +33,29 @@ class Auth extends BD_Controller {
         $val = $this->UsersModel->authenticate($q)->row(); //Model to get single data row from database base on username
         if($this->UsersModel->authenticate($q)->num_rows() == 0){
             $response = $this->setresponse->jsonResponse([],$invalidLogin,true);
-            $this->response($response, REST_Controller::HTTP_NOT_FOUND);
+            $this->response($response, REST_Controller::HTTP_OK);
         }
 
 		$match = $val->password;   //Get password for user from database
         
         if($p == $match){  //Condition if password matched
 
-            $t
-        	$token['id']        = $val->id;  //From here
-            $token['user_id']   = $val->user_id;
-            $token['username']  = $u;
-            
+
             ///Get user info 
             $where_userinfo     = array('users.user_id' => $val->user_id); //For where query condition
             $user_info          = $this->UsersModel->get_user_info($where_userinfo)->row();
 
             $date                   = new DateTime();
-            $token['iat']           = $date->getTimestamp();
-            $token['exp']           = $date->getTimestamp() + 60*60*5; //To here is to generate token
+
+            $token = array(
+                'id'        => $val->id,  //From here
+                'user_type' => $val->user_type,
+                'role'      => $val->role,
+                'user_id'   => $val->user_id,
+                'username'  => $u,
+                'iat'       => $date->getTimestamp(),
+                'exp'       => $date->getTimestamp() + 60*60*5 //To here is to generate token
+            );
 
             $output = array(
                 'token'     => JWT::encode($token,$kunci), //This is the output token,
@@ -64,7 +68,7 @@ class Auth extends BD_Controller {
         }
         else {
             $response = $this->setresponse->jsonResponse([],$invalidLogin,true);
-            $this->set_response($response, REST_Controller::HTTP_NOT_FOUND); //This is the respon if failed
+            $this->set_response($response, REST_Controller::HTTP_OK); //This is the respon if failed
         }
     }
 
@@ -84,34 +88,34 @@ class Auth extends BD_Controller {
 
         if(empty($username)){
             $response = $this->setresponse->jsonResponse([],"Empty Username",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($password)){
             $response = $this->setresponse->jsonResponse([],"Empty Password",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($user_type)){
             $response = $this->setresponse->jsonResponse([],"Empty User-type",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($role)){
             $response = $this->setresponse->jsonResponse([],"Empty User-role",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($lastname)){
             $response = $this->setresponse->jsonResponse([],"Empty Lastname",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($middlename)){
             $response = $this->setresponse->jsonResponse([],"Empty Middlename",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($firstname)){
             $response = $this->setresponse->jsonResponse([],"Empty Firstname",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($mobile)){
             $response = $this->setresponse->jsonResponse([],"Empty Mobile #",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if(empty($email)){
             $response = $this->setresponse->jsonResponse([],"Empty Username",true);
-            $this->set_response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->set_response($response, REST_Controller::HTTP_OK);
         }else if($this->UsersModel->authenticate($q)->num_rows() == 1){
             $response = $this->setresponse->jsonResponse([],"Username already taken",true);
-            $this->response($response, REST_Controller::HTTP_BAD_REQUEST);
+            $this->response($response, REST_Controller::HTTP_OK);
         }
         else{
             try{
@@ -141,11 +145,11 @@ class Auth extends BD_Controller {
                     $this->set_response($response, REST_Controller::HTTP_OK); //This is the respon if success
                 }else{
                     $response = $this->setresponse->jsonResponse([],"Registration Error",true);
-                    $this->set_response($response, REST_Controller::HTTP_NOT_FOUND); //This is the respon if failed
+                    $this->set_response($response, REST_Controller::HTTP_OK); //This is the respon if failed
                 }
             }catch(Exception $e){
                 $response = $this->setresponse->jsonResponse([],$e,true);
-                $this->set_response($response, REST_Controller::HTTP_NOT_FOUND); //This is the respon if failed
+                $this->set_response($response, REST_Controller::HTTP_OK); //This is the respon if failed
             }
         }
     }

@@ -8,6 +8,7 @@ class Users extends BD_Controller {
         // Construct the parent class
         parent::__construct();
         $this->load->model('UsersModel');
+        $this->load->model('BusinessModel');
         $this->load->library('SetResponse',NULL,'setresponse');
         $this->load->library('Uuid',NULL,'uuid');
         $this->auth();
@@ -22,6 +23,30 @@ class Users extends BD_Controller {
         $where_userinfo = empty($user_id) ? array('users.is_active' => $is_active) :  array('users.user_id' => $user_id); //For where query condition
         $user_info      = $this->UsersModel->get_user_info($where_userinfo);
         $output         = empty($user_id) ? $user_info->result() : $user_info->row();
+        $response       = $this->setresponse->jsonResponse($output,"Success",false);
+        $this->set_response($response, REST_Controller::HTTP_OK); //This is the respon if success
+    }
+
+    public function profile()
+    {
+        $output         = array();
+        $user_id        = $this->input->get("user_id");
+        $is_active      = $this->input->get("is_active");
+        
+        $where_userinfo = empty($user_id) ? array('users.is_active' => $is_active) :  array('users.user_id' => $user_id); //For where query condition
+        $user_info      = $this->UsersModel->get_user_info($where_userinfo);
+
+        // Business Data
+        $where_business_info    = array('business.owner_id' => $user_   id);
+        $business_info           = $this->BusinessModel->get_info($where_business_info);
+
+        $output['user_info']         = empty($user_id) ? $user_info->result() : $user_info->row();
+
+        if($business_info->num_rows() > 0){
+            $output['business'] = $business_info->row();
+        }
+       
+        
         $response       = $this->setresponse->jsonResponse($output,"Success",false);
         $this->set_response($response, REST_Controller::HTTP_OK); //This is the respon if success
     }
